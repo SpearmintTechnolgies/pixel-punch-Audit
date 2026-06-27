@@ -49,6 +49,9 @@ interface ResultsData {
     job_title: string;
   };
   score?: {
+    readiness?: Rag;
+    value?:     Rag;
+    opportunity?: Rag;
     categories?: Record<string, {
       name: string;
       score: number;
@@ -138,6 +141,13 @@ export default function OpportunityResultsContent() {
 
   if (!data) return null;
 
+  // Safe fallback for database vs in-memory api schemas
+  const scorecard = data.scorecard || {
+    readiness: data.score?.readiness ?? "amber",
+    value: data.score?.value ?? "amber",
+    opportunity: data.score?.opportunity ?? "amber",
+  };
+
   // Extract categories for 6-grid view, with fallbacks
   const categories = data.score?.categories || {};
 
@@ -192,17 +202,17 @@ export default function OpportunityResultsContent() {
             {
               title: "Technical AI Readiness",
               desc: "Workflow standardization, data structure, and system connection levels.",
-              rag: data.scorecard.readiness,
+              rag: scorecard.readiness,
             },
             {
               title: "Business Value Potential",
               desc: "Urgency of resolving core manual pain points and expected ROI.",
-              rag: data.scorecard.value,
+              rag: scorecard.value,
             },
             {
               title: "Automation Opportunity",
               desc: "Density of routine data and customer processes ready for AI.",
-              rag: data.scorecard.opportunity,
+              rag: scorecard.opportunity,
             },
           ].map((card, idx) => {
             const styles = RAG_STYLES[card.rag];
